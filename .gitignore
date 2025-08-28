@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+
+# Virtual envs & IDE
+.venv/
+.vscode/
+.idea/
+
+# Secrets / local env
+.env
+*.env
+.env.*
+configs/Embeddings/*.yaml
+!configs/Embeddings/*.template.yaml
+
+# Runtime & logs
+logs/
+tmp/
+nohup.out
+*.log
+
+# Data / large blobs (prefer S3 or LFS)
+*.zip
+*.tar*
+*.csv
+*.parquet
+*.db
+*.sqlite*
+*.dump
+*.bak
