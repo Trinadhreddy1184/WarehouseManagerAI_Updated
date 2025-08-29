@@ -1,11 +1,11 @@
 
 # Liquor and Wine Store ChatBot Project
 
-This project is designed to assist with liquor and wine store management through a ChatBot application. It leverages support from OpenAI and Amazon LLM models to respond to various user queries related to store inventory and operations.
+This project is designed to assist with liquor and wine store management through a ChatBot application. It leverages Amazon Bedrock models to respond to various user queries related to store inventory and operations.
 
 ## Features
 
-- **LLM Models:** Supports both OpenAI and Amazon LLM models.
+- **LLM Models:** Supports Amazon Bedrock models.
 - **Database:** Utilizes PostgreSQL for relational database management.
 - **Embeddings:** Pinecone is used for embedding operations.
 - **Langchain Agents and Tools:** Creates an agent to query both relational and unstructured datasets based on user queries.
@@ -54,7 +54,7 @@ This project is designed to assist with liquor and wine store management through
 2. **Interacting with the ChatBot:**
    - Open the Streamlit application in your browser.
      - Use the ChatBot interface to query the liquor and wine store inventory system.
-     - The ChatBot will respond based on the combined power of OpenAI and Amazon LLM models, querying the PostgreSQL database and Pinecone embeddings as needed.
+     - The ChatBot will respond using Amazon Bedrock models, querying the PostgreSQL database and Pinecone embeddings as needed.
 
 ## Project Structure
 
@@ -96,7 +96,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Acknowledgements
 
-- [OpenAI](https://www.openai.com/)
 - [Amazon LLM](https://aws.amazon.com/machine-learning/large-language-models/)
 - [Langchain](https://langchain.com/)
 - [Pinecone](https://www.pinecone.io/)
