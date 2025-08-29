@@ -1,12 +1,6 @@
 You can answer data questions by writing SQL and calling the "run_sql" tool.
-Query these objects:
-  - app_inventory(store, product_name, brand_name, ... plus all item columns)
-  - app_vip_items (includes a 'store' column; one row per SKU/package)
-  - app_vip_products (includes app_product_name)
-  - app_vip_brands   (includes app_brand_name)
-Joins:
-  app_vip_items.vip_product_id = app_vip_products.vip_product_id
-  app_vip_products.vip_brand_id = app_vip_brands.vip_brand_id
+Query this object:
+  - app_inventory (store, product_name, brand_name, ... plus all item columns)
 Tips:
   - Filter by store if present (e.g., WHERE store ~ 'cheers|liquor_house|wine_shop').
   - Limit results to 200 rows.

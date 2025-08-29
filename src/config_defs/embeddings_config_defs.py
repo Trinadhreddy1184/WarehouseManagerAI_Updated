@@ -8,7 +8,7 @@ class EmbeddingsTag(Enum):
     PINECONE = "pinecone"
 
 class EmbeddingsType(Enum):
-    OPENAI = "openai"
+    BEDROCK = "bedrock"
 
 @dataclass
 class EmbeddingsConfig:
@@ -20,14 +20,15 @@ class PineconeConfig:
     index_name: str = omegaconf.MISSING
 
 @dataclass
-class OpenAIConfig:
-    embeddings_model_name: str = omegaconf.MISSING
+class BedrockConfig:
+    region_name: str = "us-east-1"
+    embeddings_model_id: str = "amazon.titan-embed-text-v1"
 
 @dataclass
 class EmbeddingsMainConfig:
     provider: EmbeddingsConfig = field(default_factory=EmbeddingsConfig)
     pinecone: Optional[PineconeConfig] = None
-    openai: Optional[OpenAIConfig] = None
+    bedrock: Optional[BedrockConfig] = None
 
     @staticmethod
     def from_file(yaml_path: str) -> "EmbeddingsMainConfig":
@@ -40,5 +41,5 @@ if __name__ == "__main__":
     yaml_str = OmegaConf.to_yaml(cfg)
 
     conf = OmegaConf.structured(EmbeddingsMainConfig)
-    conf = OmegaConf.merge(conf, OmegaConf.load("/home/user/inventoryqabot/configs/Embeddings/pinecone.yaml"))
+    conf = OmegaConf.merge(conf, OmegaConf.load("configs/Embeddings/pinecone.yaml"))
     print(conf)

@@ -15,8 +15,7 @@ def _system_prompt() -> str:
         return p.read_text(encoding="utf-8")
     return (
         "You are a Liquor and Wine Store inventory assistant with SQL tools over PostgreSQL. "
-        "Use ONLY app_vip_items, app_vip_products, app_vip_brands, app_inventory. "
-        "Read-only queries; use LIMIT for previews."
+        "Use ONLY app_inventory. Read-only queries; use LIMIT for previews."
     )
 
 def _try_bedrock():
@@ -28,30 +27,15 @@ def _try_bedrock():
     except Exception:
         return None
 
-def _try_openai():
-    try:
-        if not os.getenv("OPENAI_API_KEY"):
-            return None
-        from langchain_openai import ChatOpenAI
-        return ChatOpenAI(model=os.getenv("OPENAI_MODEL","gpt-4o-mini"))
-    except Exception:
-        return None
-
 def _get_model():
-    # Try Bedrock then OpenAI
-    m = _try_bedrock()
-    if m is not None:
-        return m
-    m = _try_openai()
-    if m is not None:
-        return m
-    return None
+    # Only Bedrock is supported
+    return _try_bedrock()
 
 def _tools():
     return [
         Tool.from_function(
             name="sql",
-            description="Run a read-only SELECT against PostgreSQL app_* views.",
+            description="Run a read-only SELECT against PostgreSQL app_inventory view.",
             func=sql_query,
         ),
         Tool.from_function(
@@ -68,7 +52,7 @@ def _rule_based_fallback(question: str) -> str:
     """
     q = (question or "").lower()
     if "how many" in q and ("items" in q or "records" in q or "rows" in q):
-        n = sql_scalar("SELECT COUNT(*) FROM app_vip_items")
+        n = sql_scalar("SELECT COUNT(*) FROM app_inventory")
         return f"Total items: {int(n)}"
     if "top" in q and "brand" in q:
         df = sql_query("""

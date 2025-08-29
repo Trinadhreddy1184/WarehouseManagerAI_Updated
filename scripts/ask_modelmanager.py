@@ -6,24 +6,17 @@ from omegaconf import OmegaConf
 
 CFG_PATH = os.getenv("LLM_CONFIG_PATH", "/opt/WarehouseManagerAI/configs/llm_config.yaml")
 cfg = OmegaConf.load(CFG_PATH)
-provider = str(cfg.get("main", {}).get("provider", "bedrock")).lower()
+provider = "bedrock"
 
 def build_llm():
-    # Prefer Bedrock (Claude) if present in your repo/config
+    # Only Bedrock (Claude/Nova) is supported
     if provider in ("bedrock", "aws", "anthropic", "claude"):
         try:
-            from src.llm.BedrockModel import BedrockModel
-            sig = inspect.signature(BedrockModel)
-            return BedrockModel(cfg) if len(sig.parameters)>=1 else BedrockModel()
+            from src.llm.BedrockModel import Bedrock
+            sig = inspect.signature(Bedrock)
+            return Bedrock(cfg) if len(sig.parameters)>=1 else Bedrock()
         except Exception as e:
-            print("BedrockModel init failed:", e)
-    # Fallback to OpenAI if available
-    try:
-        from src.llm.OpenAIModel import OpenAIModel
-        sig = inspect.signature(OpenAIModel)
-        return OpenAIModel(cfg) if len(sig.parameters)>=1 else OpenAIModel()
-    except Exception as e:
-        print("OpenAIModel init failed:", e)
+            print("Bedrock init failed:", e)
     raise RuntimeError("No LLM provider could be constructed.")
 
 def build_manager(llm):

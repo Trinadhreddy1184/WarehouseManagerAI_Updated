@@ -50,7 +50,7 @@ header("DB smoke tests (via sql_tool)")
 try:
     os.environ.setdefault("WM_DEBUG_SQL","1")
     from src.tools.sql_tool import sql_scalar, sql_query
-    print("COUNT(app_vip_items) =>", sql_scalar("SELECT COUNT(*) FROM app_vip_items"))
+    print("COUNT(app_inventory) =>", sql_scalar("SELECT COUNT(*) FROM app_inventory"))
     df = sql_query("SELECT store, product_name, brand_name FROM app_inventory LIMIT 3")
     print(df.to_string(index=False))
 except Exception as e:
