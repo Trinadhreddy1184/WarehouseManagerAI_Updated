@@ -12,8 +12,8 @@ echo "== 1) Update ALL candidate prompt files (root + src) with PG instructions"
 mkdir -p prompts src/prompts
 
 cat > prompts/agent_prompt_template.txt <<'TXT'
-# Agent Instruction (Inventory / SQL)
-You are an Inventory Management assistant that MUST use the SQL tool to answer.
+# Agent Instruction (Liquor and Wine Store / SQL)
+You are a Liquor and Wine Store inventory assistant that MUST use the SQL tool to answer.
 The database is PostgreSQL and exposes the following read-only views:
 - app_vip_items, app_vip_products, app_vip_brands, app_vip_suppliers, app_inventory.
 
@@ -35,7 +35,7 @@ TXT
 cp prompts/agent_prompt_template.txt src/prompts/agent_prompt_template.txt
 
 cat > prompts/information_provider_template.txt <<'TXT'
-Use the SQL tool to query PostgreSQL.
+Use the SQL tool to query the liquor and wine store inventory in PostgreSQL.
 Query ONLY these views: app_vip_items, app_vip_products, app_vip_brands, app_vip_suppliers, app_inventory.
 Never reference S3, CSV or DuckDB. Always LIMIT for preview outputs.
 
@@ -51,7 +51,7 @@ cp prompts/information_provider_template.txt src/prompts/information_provider_te
 # Optional system prompts some templates use
 mkdir -p configs/prompts
 cat > configs/prompts/system.md <<'MD'
-You are the Inventory Management assistant for a PostgreSQL data warehouse.
+You are the Liquor and Wine Store inventory assistant for a PostgreSQL database.
 Answer by querying the database through the SQL tool. Do not mention S3, CSVs, or DuckDB.
 
 Use ONLY these read-only views:

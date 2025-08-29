@@ -5,7 +5,7 @@ from src.agents.tools_registry import TOOLS, TOOL_FUNCS
 
 def load_system_messages() -> list[dict[str, str]]:
     # Base system content (add your project-specific instructions here)
-    base = "You are the Warehouse Manager AI. Use tools when helpful."
+    base = "You are the Liquor and Wine Store Manager AI. Use tools when helpful."
     sql_rules = Path("prompts/system_sql.md").read_text(encoding="utf-8")
     return [{"role": "system", "content": base + "\n\n" + sql_rules}]
 

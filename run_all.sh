@@ -304,7 +304,7 @@ docker exec -e PGPASSWORD="$POSTGRES_PASSWORD" wm_pgvector \
 # remove host dump to save space
 rm -f "$RAW_DUMP" "$SANITIZED" 2>/dev/null || true
 
-# ---------- 11) Host venv + Streamlit (background) ----------
+# ---------- 11) Host venv (dependencies only) ----------
 log "Preparing host venv for Streamlit…"
 if [ ! -d "$APP_DIR/.venv" ]; then sudo python3 -m venv "$APP_DIR/.venv"; fi
 sudo "$APP_DIR/.venv/bin/pip" install --upgrade pip >/dev/null
@@ -318,12 +318,8 @@ export DATA_BACKEND=postgres
 export DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${DB_PORT}/${POSTGRES_DB}"
 export SQLALCHEMY_DATABASE_URL="$DATABASE_URL"
 
-log "Launching Streamlit on 0.0.0.0:8501 (background)…"
-nohup sudo -E "$APP_DIR/.venv/bin/streamlit" run ui/streamlit_ui.py \
-  --server.port=8501 --server.address=0.0.0.0 \
-  > "$APP_DIR/logs/streamlit.log" 2>&1 &
-
-log "Streamlit PID: $!"
-log "Open:  http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo localhost):8501"
-log "Tail:  tail -f $APP_DIR/logs/streamlit.log"
+# ---------- 12) Patch prompts/tools and launch UI ----------
+log "Patching prompts/tools and launching Streamlit…"
+bash scripts/patch_src_for_pg.sh
+bash scripts/fix_prompts_and_tools.sh
 

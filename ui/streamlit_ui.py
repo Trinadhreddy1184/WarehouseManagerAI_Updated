@@ -19,9 +19,9 @@ from streamlit_chat import message
 from src.llm.ModelManager import ModelManager
 from src.config_defs.llm_config_defs import LLMMainConfig
 
-st.set_page_config(page_title="Inventory Management Chatbot", layout="wide")
+st.set_page_config(page_title="Liquor and Wine Store Chatbot", layout="wide")
 
-st.header("Inventory Management Chatbot")
+st.header("Liquor and Wine Store Chatbot")
 
 # --- load config/model ---
 llm_config: LLMMainConfig = LLMMainConfig.from_file(os.getenv("LLM_CONFIG_PATH"))

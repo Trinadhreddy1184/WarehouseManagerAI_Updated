@@ -14,7 +14,7 @@ def _system_prompt() -> str:
     if p.exists():
         return p.read_text(encoding="utf-8")
     return (
-        "You are an Inventory assistant with SQL tools over PostgreSQL. "
+        "You are a Liquor and Wine Store inventory assistant with SQL tools over PostgreSQL. "
         "Use ONLY app_vip_items, app_vip_products, app_vip_brands, app_inventory. "
         "Read-only queries; use LIMIT for previews."
     )
