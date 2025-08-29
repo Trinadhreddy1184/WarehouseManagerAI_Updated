@@ -28,21 +28,9 @@ def _try_bedrock():
     except Exception:
         return None
 
-def _try_openai():
-    try:
-        if not os.getenv("OPENAI_API_KEY"):
-            return None
-        from langchain_openai import ChatOpenAI
-        return ChatOpenAI(model=os.getenv("OPENAI_MODEL","gpt-4o-mini"))
-    except Exception:
-        return None
-
 def _get_model():
-    # Try Bedrock then OpenAI
+    # Try Bedrock; if unavailable fall back to rule-based answers
     m = _try_bedrock()
-    if m is not None:
-        return m
-    m = _try_openai()
     if m is not None:
         return m
     return None
