@@ -5,7 +5,7 @@ from typing import List
 from langchain.schema import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader
-from langchain_openai import OpenAIEmbeddings
+from langchain_aws import BedrockEmbeddings
 from langchain_pinecone import PineconeVectorStore
 
 from src.config_defs.embeddings_config_defs import EmbeddingsType, EmbeddingsTag, EmbeddingsMainConfig
@@ -20,8 +20,11 @@ class Pinecone(ProviderBase):
         self.embeddings = None
 
         if(config.provider.provider_tag == EmbeddingsTag.PINECONE):
-            if(config.provider.embeddings_type == EmbeddingsType.OPENAI):
-                self.embeddings = OpenAIEmbeddings(model=config.openai.embeddings_model_name)
+            if(config.provider.embeddings_type == EmbeddingsType.BEDROCK):
+                self.embeddings = BedrockEmbeddings(
+                    model_id=config.bedrock.embeddings_model_id,
+                    region_name=config.bedrock.region_name,
+                )
             
 
     def load_documents_from_directory(self, directory):

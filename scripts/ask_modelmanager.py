@@ -17,13 +17,6 @@ def build_llm():
             return BedrockModel(cfg) if len(sig.parameters)>=1 else BedrockModel()
         except Exception as e:
             print("BedrockModel init failed:", e)
-    # Fallback to OpenAI if available
-    try:
-        from src.llm.OpenAIModel import OpenAIModel
-        sig = inspect.signature(OpenAIModel)
-        return OpenAIModel(cfg) if len(sig.parameters)>=1 else OpenAIModel()
-    except Exception as e:
-        print("OpenAIModel init failed:", e)
     raise RuntimeError("No LLM provider could be constructed.")
 
 def build_manager(llm):
