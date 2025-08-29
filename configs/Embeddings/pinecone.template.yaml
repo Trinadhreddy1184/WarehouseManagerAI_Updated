@@ -1,8 +1,9 @@
 # pinecone.yaml
 provider:
   provider_tag: PINECONE
-  embeddings_type: OPENAI
+  embeddings_type: BEDROCK
 pinecone:
   index_name: product-index
-openai:
-  embeddings_model_name: text-embedding-3-small
+bedrock:
+  region_name: us-east-1
+  embeddings_model_id: amazon.titan-embed-text-v1

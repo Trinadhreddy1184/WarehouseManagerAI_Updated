@@ -69,13 +69,10 @@ YAML
 echo "== 3) Views (idempotent; includes app_inventory) =="
 mkdir -p views
 cat > views/999_app_views.sql <<'SQL'
-DROP VIEW IF EXISTS app_inventory CASCADE;
-DROP VIEW IF EXISTS app_vip_items CASCADE;
-DROP VIEW IF EXISTS app_vip_products CASCADE;
-DROP VIEW IF EXISTS app_vip_brands CASCADE;
-DROP VIEW IF EXISTS app_vip_suppliers CASCADE;
-
+-- Idempotent views; safe to re-run
 CREATE EXTENSION IF NOT EXISTS vector;
+
+DROP VIEW IF EXISTS app_inventory CASCADE;
 
 DO $$
 DECLARE
@@ -87,51 +84,65 @@ DECLARE
     SELECT 1 FROM information_schema.columns
     WHERE table_schema='public' AND table_name='vip_items' AND column_name='vip_source_id'
   );
-  store_expr text;
 BEGIN
   IF has_store_col THEN
-    EXECUTE 'CREATE OR REPLACE VIEW app_vip_items AS SELECT * FROM vip_items';
-    RETURN;
-  END IF;
-  IF has_source_id THEN
-    store_expr := '(''source_'' || i.vip_source_id::text)';
+    EXECUTE $f$
+      CREATE OR REPLACE VIEW app_inventory AS
+      SELECT
+        i.*,
+        COALESCE(NULLIF(TRIM(p.consumer_product_name), ''),
+                 NULLIF(TRIM(p.product_name), ''),
+                 NULLIF(TRIM(p.product_short_name), ''),
+                 NULLIF(TRIM(p.fanciful_name), ''),
+                 'Unknown')::text AS product_name,
+        COALESCE(NULLIF(TRIM(b.consumer_brand_name), ''),
+                 NULLIF(TRIM(b.brand_name), ''),
+                 NULLIF(TRIM(b.brand_short_name), ''),
+                 'Unknown')::text AS brand_name
+      FROM vip_items i
+      JOIN vip_products p ON p.vip_product_id = i.vip_product_id
+      JOIN vip_brands   b ON b.vip_brand_id   = p.vip_brand_id;
+    $f$;
+  ELSIF has_source_id THEN
+    EXECUTE $f$
+      CREATE OR REPLACE VIEW app_inventory AS
+      SELECT
+        i.*,
+        ('source_' || i.vip_source_id::text) AS store,
+        COALESCE(NULLIF(TRIM(p.consumer_product_name), ''),
+                 NULLIF(TRIM(p.product_name), ''),
+                 NULLIF(TRIM(p.product_short_name), ''),
+                 NULLIF(TRIM(p.fanciful_name), ''),
+                 'Unknown')::text AS product_name,
+        COALESCE(NULLIF(TRIM(b.consumer_brand_name), ''),
+                 NULLIF(TRIM(b.brand_name), ''),
+                 NULLIF(TRIM(b.brand_short_name), ''),
+                 'Unknown')::text AS brand_name
+      FROM vip_items i
+      JOIN vip_products p ON p.vip_product_id = i.vip_product_id
+      JOIN vip_brands   b ON b.vip_brand_id   = p.vip_brand_id;
+    $f$;
   ELSE
-    store_expr := 'NULL::text';
+    EXECUTE $f$
+      CREATE OR REPLACE VIEW app_inventory AS
+      SELECT
+        i.*,
+        NULL::text AS store,
+        COALESCE(NULLIF(TRIM(p.consumer_product_name), ''),
+                 NULLIF(TRIM(p.product_name), ''),
+                 NULLIF(TRIM(p.product_short_name), ''),
+                 NULLIF(TRIM(p.fanciful_name), ''),
+                 'Unknown')::text AS product_name,
+        COALESCE(NULLIF(TRIM(b.consumer_brand_name), ''),
+                 NULLIF(TRIM(b.brand_name), ''),
+                 NULLIF(TRIM(b.brand_short_name), ''),
+                 'Unknown')::text AS brand_name
+      FROM vip_items i
+      JOIN vip_products p ON p.vip_product_id = i.vip_product_id
+      JOIN vip_brands   b ON b.vip_brand_id   = p.vip_brand_id;
+    $f$;
   END IF;
-  EXECUTE format($f$
-    CREATE OR REPLACE VIEW app_vip_items AS
-    SELECT i.*, %s AS store
-    FROM vip_items i
-  $f$, store_expr);
 END $$;
-
-CREATE OR REPLACE VIEW app_vip_products AS
-SELECT p.*,
-       COALESCE(NULLIF(TRIM(p.consumer_product_name), ''),
-                NULLIF(TRIM(p.product_name), ''),
-                NULLIF(TRIM(p.product_short_name), ''),
-                NULLIF(TRIM(p.fanciful_name), ''),
-                'Unknown')::text AS app_product_name
-FROM vip_products p;
-
-CREATE OR REPLACE VIEW app_vip_brands AS
-SELECT b.*,
-       COALESCE(NULLIF(TRIM(b.consumer_brand_name), ''),
-                NULLIF(TRIM(b.brand_name), ''),
-                NULLIF(TRIM(b.brand_short_name), ''),
-                'Unknown')::text AS app_brand_name
-FROM vip_brands b;
-
-CREATE OR REPLACE VIEW app_vip_suppliers AS SELECT * FROM vip_suppliers;
-
-CREATE OR REPLACE VIEW app_inventory AS
-SELECT
-  i.*,
-  p.app_product_name AS product_name,
-  b.app_brand_name   AS brand_name
-FROM app_vip_items i
-JOIN app_vip_products p ON p.vip_product_id = i.vip_product_id
-JOIN app_vip_brands   b ON b.vip_brand_id   = p.vip_brand_id;
 SQL
 
 echo "== 4) Minimal compose for DB (regular 5432 on host) =="
@@ -187,43 +198,13 @@ else
 fi
 
 echo "Applying app_* views…"
-docker-compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 <<'SQL'
-\set ON_ERROR_STOP on
-DROP VIEW IF EXISTS app_inventory CASCADE;
-DROP VIEW IF EXISTS app_vip_items CASCADE;
-DROP VIEW IF EXISTS app_vip_products CASCADE;
-DROP VIEW IF EXISTS app_vip_brands CASCADE;
-DROP VIEW IF EXISTS app_vip_suppliers CASCADE;
-CREATE EXTENSION IF NOT EXISTS vector;
-DO $$
-DECLARE has_store_col boolean := EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='vip_items' AND column_name='store');
-        has_source_id boolean := EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='vip_items' AND column_name='vip_source_id');
-        store_expr text;
-BEGIN
-  IF has_store_col THEN
-    EXECUTE 'CREATE OR REPLACE VIEW app_vip_items AS SELECT * FROM vip_items';
-  ELSE
-    store_expr := CASE WHEN has_source_id THEN '(''source_'' || i.vip_source_id::text)' ELSE 'NULL::text' END;
-    EXECUTE format($f$ CREATE OR REPLACE VIEW app_vip_items AS SELECT i.*, %s AS store FROM vip_items i $f$, store_expr);
-  END IF;
-END $$;
-CREATE OR REPLACE VIEW app_vip_products AS
-SELECT p.*, COALESCE(NULLIF(TRIM(p.consumer_product_name), ''), NULLIF(TRIM(p.product_name), ''), NULLIF(TRIM(p.product_short_name), ''), NULLIF(TRIM(p.fanciful_name), ''), 'Unknown')::text AS app_product_name FROM vip_products p;
-CREATE OR REPLACE VIEW app_vip_brands AS
-SELECT b.*, COALESCE(NULLIF(TRIM(b.consumer_brand_name), ''), NULLIF(TRIM(b.brand_name), ''), NULLIF(TRIM(b.brand_short_name), ''), 'Unknown')::text AS app_brand_name FROM vip_brands b;
-CREATE OR REPLACE VIEW app_vip_suppliers AS SELECT * FROM vip_suppliers;
-CREATE OR REPLACE VIEW app_inventory AS
-SELECT i.*, p.app_product_name AS product_name, b.app_brand_name AS brand_name
-FROM app_vip_items i
-JOIN app_vip_products p ON p.vip_product_id = i.vip_product_id
-JOIN app_vip_brands   b ON b.vip_brand_id   = p.vip_brand_id;
-SQL
+cat views/999_app_views.sql | docker-compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1
 
 echo "== 8) Verify DB objects on 5432 =="
 docker-compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
-"SELECT to_regclass('public.app_vip_items') AS app_vip_items, to_regclass('public.app_inventory') AS app_inventory;"
+"SELECT to_regclass('public.vip_items') AS vip_items, to_regclass('public.app_inventory') AS app_inventory;"
 docker-compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
-"SELECT COUNT(*) AS items FROM app_vip_items;"
+"SELECT COUNT(*) AS items FROM app_inventory;"
 docker-compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
 "SELECT store, product_name, brand_name FROM app_inventory LIMIT 5;"
 

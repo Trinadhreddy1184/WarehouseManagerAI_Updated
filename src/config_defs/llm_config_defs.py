@@ -6,8 +6,6 @@ from omegaconf import OmegaConf
 
 class LLMTag(Enum):
     BEDROCK = "bedrock"
-    OPENAI = "openai"
-    GEMINI = "gemini"
 
 @dataclass
 class LLMConfig:
@@ -20,18 +18,11 @@ class BedrockConfig:
     model_id: str = "claude-3-sonnet-20240229-v1:0"
     model_provider: str = "bedrock"
 
-@dataclass
-class OpenAIConfig:
-    llm_tag: LLMTag = LLMTag.OPENAI
-    model_name: str = "gpt-4-1106-preview"
-    model_provider: str = "openai"
-    json_mode: bool = True
 
 @dataclass
 class LLMMainConfig:
     llm: LLMConfig = field(default_factory=LLMConfig)
     bedrock: Optional[BedrockConfig] = None
-    openai: Optional[OpenAIConfig] = None
 
     @staticmethod
     def from_file(yaml_path: str) -> "LLMMainConfig":
@@ -45,6 +36,6 @@ if __name__ == "__main__":
     yaml_str = OmegaConf.to_yaml(cfg)
 
     conf = OmegaConf.structured(LLMMainConfig)
-    conf = OmegaConf.merge(conf, OmegaConf.load("./configs/openai.yaml"))
+    conf = OmegaConf.merge(conf, OmegaConf.load("configs/llm_config.yaml"))
 
     print(conf)

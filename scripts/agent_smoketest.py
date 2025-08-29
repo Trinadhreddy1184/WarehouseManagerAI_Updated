@@ -2,7 +2,11 @@ import os, sys, json
 from pathlib import Path
 
 # Ensure imports work exactly like the app
-sys.path.insert(0, "/opt/WarehouseManagerAI")
+repo_root = os.environ.get("PYTHONPATH")
+if repo_root and Path(repo_root).exists():
+    sys.path.insert(0, repo_root)
+else:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 def header(t): print("\n" + "="*10 + " " + t + " " + "="*10)
 
@@ -50,7 +54,7 @@ header("DB smoke tests (via sql_tool)")
 try:
     os.environ.setdefault("WM_DEBUG_SQL","1")
     from src.tools.sql_tool import sql_scalar, sql_query
-    print("COUNT(app_vip_items) =>", sql_scalar("SELECT COUNT(*) FROM app_vip_items"))
+    print("COUNT(app_inventory) =>", sql_scalar("SELECT COUNT(*) FROM app_inventory"))
     df = sql_query("SELECT store, product_name, brand_name FROM app_inventory LIMIT 3")
     print(df.to_string(index=False))
 except Exception as e:
@@ -60,8 +64,14 @@ except Exception as e:
 header("ModelManager.provide_information()")
 try:
     from src.llm.ModelManager import ModelManager
-    mm = ModelManager()
-    answer = mm.provide_information(user_request="How many items are there in inventory?", chat_history=[])
-    print("LLM ANSWER:\n", answer)
+    from src.config_defs.llm_config_defs import LLMMainConfig
+    p = os.getenv("LLM_CONFIG_PATH")
+    if p and Path(p).exists():
+        cfg = LLMMainConfig.from_file(p)
+        mm = ModelManager.new_instance_from_config(cfg)
+        answer = mm.provide_information(user_request="How many items are there in inventory?", chat_history=[])
+        print("LLM ANSWER:\n", answer)
+    else:
+        print("LLM_CONFIG_PATH not set or file missing")
 except Exception as e:
     print("ModelManager path failed:", repr(e))
