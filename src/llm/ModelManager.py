@@ -14,13 +14,21 @@ class ModelManager:
 
     @staticmethod
     def new_instance_from_config(config: LLMMainConfig) -> "ModelManager":
-        match config.llm.llm_tag:
-            case LLMTag.BEDROCK:
-                return ModelManager(config, Bedrock(config))
-            # case LLMTag.OPENAI:
-            #     return ModelManager(config, OpenAIModel(config))
-            case _:
-                raise ValueError(f"Invalid LLM tag: {config.llm.llm_tag}")
+        """Create a new ``ModelManager`` based on the provided configuration.
+
+        The previous implementation used Python's ``match`` statement, which is
+        only available from Python 3.10 onwards.  This caused a ``SyntaxError``
+        when running the code in environments that rely on older Python
+        versions, such as 3.9.  To maintain compatibility, the pattern matching
+        has been rewritten using standard ``if``/``elif`` logic.
+        """
+        tag = config.llm.llm_tag
+        if tag == LLMTag.BEDROCK:
+            return ModelManager(config, Bedrock(config))
+        # elif tag == LLMTag.OPENAI:
+        #     return ModelManager(config, OpenAIModel(config))
+        else:
+            raise ValueError(f"Invalid LLM tag: {tag}")
 
     def provide_information(
         self,
