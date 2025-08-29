@@ -8,7 +8,7 @@ mkdir -p configs/prompts
 
 echo "==> Write PG-first system prompts (new files)"
 cat > configs/prompts/system.md <<'MD'
-You are the Inventory Management assistant for a PostgreSQL data warehouse.
+You are the Liquor and Wine Store inventory assistant for a PostgreSQL database.
 Answer by querying the database through the SQL tool. Do not mention S3, CSVs, or DuckDB.
 
 Use ONLY these read-only views:
@@ -52,8 +52,8 @@ echo "==> Patch src/prompts templates (remove legacy references)"
 mkdir -p src/prompts
 if [ -f src/prompts/agent_prompt_template.txt ]; then cp -n src/prompts/agent_prompt_template.txt src/prompts/agent_prompt_template.txt.bak; fi
 cat > src/prompts/agent_prompt_template.txt <<'TXT'
-# Agent Instruction (Inventory / SQL)
-You are an Inventory Management assistant that MUST use the SQL tool to answer.
+# Agent Instruction (Liquor and Wine Store / SQL)
+You are a Liquor and Wine Store inventory assistant that MUST use the SQL tool to answer.
 The database is PostgreSQL and exposes the following views:
 - app_vip_items, app_vip_products, app_vip_brands, app_vip_suppliers, app_inventory.
 

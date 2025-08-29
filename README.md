@@ -1,7 +1,7 @@
 
-# Warehouse Management ChatBot Project
+# Liquor and Wine Store ChatBot Project
 
-This project is designed to assist with warehouse management through a ChatBot application. It leverages support from OpenAI and Amazon LLM models to respond to various user queries related to warehouse management.
+This project is designed to assist with liquor and wine store management through a ChatBot application. It leverages support from OpenAI and Amazon LLM models to respond to various user queries related to store inventory and operations.
 
 ## Features
 
@@ -16,8 +16,8 @@ This project is designed to assist with warehouse management through a ChatBot a
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/samitugal/WarehouseManagerAI.git
-   cd warehouse-management-chatbot
+   git clone https://github.com/Trinadhreddy1184/WarehouseManagerAI_Updated.git
+   cd WarehouseManagerAI_Updated
    ```
 
 2. **Set up the Python environment:**
@@ -53,8 +53,8 @@ This project is designed to assist with warehouse management through a ChatBot a
 
 2. **Interacting with the ChatBot:**
    - Open the Streamlit application in your browser.
-   - Use the ChatBot interface to query the warehouse management system.
-   - The ChatBot will respond based on the combined power of OpenAI and Amazon LLM models, querying the PostgreSQL database and Pinecone embeddings as needed.
+     - Use the ChatBot interface to query the liquor and wine store inventory system.
+     - The ChatBot will respond based on the combined power of OpenAI and Amazon LLM models, querying the PostgreSQL database and Pinecone embeddings as needed.
 
 ## Project Structure
 
