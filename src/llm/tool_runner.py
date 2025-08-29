@@ -15,7 +15,7 @@ def _system_prompt() -> str:
         return p.read_text(encoding="utf-8")
     return (
         "You are a Liquor and Wine Store inventory assistant with SQL tools over PostgreSQL. "
-        "Use ONLY app_vip_items, app_vip_products, app_vip_brands, app_inventory. "
+        "Use ONLY the app_inventory view. "
         "Read-only queries; use LIMIT for previews."
     )
 
@@ -56,7 +56,7 @@ def _rule_based_fallback(question: str) -> str:
     """
     q = (question or "").lower()
     if "how many" in q and ("items" in q or "records" in q or "rows" in q):
-        n = sql_scalar("SELECT COUNT(*) FROM app_vip_items")
+        n = sql_scalar("SELECT COUNT(*) FROM app_inventory")
         return f"Total items: {int(n)}"
     if "top" in q and "brand" in q:
         df = sql_query("""
