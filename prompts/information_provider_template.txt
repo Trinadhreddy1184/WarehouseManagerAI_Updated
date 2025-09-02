@@ -1,9 +1,0 @@
-Use the SQL tool to query PostgreSQL.
-Query ONLY these views: app_vip_items, app_vip_products, app_vip_brands, app_vip_suppliers, app_inventory.
-Never reference S3, CSV or DuckDB. Always LIMIT for preview outputs.
-
-Snippets:
-- SELECT COUNT(*) FROM app_vip_items;
-- SELECT store, product_name, brand_name FROM app_inventory LIMIT 10;
-- SELECT brand_name, COUNT(*) items FROM app_inventory
-  GROUP BY brand_name ORDER BY items DESC LIMIT 10;

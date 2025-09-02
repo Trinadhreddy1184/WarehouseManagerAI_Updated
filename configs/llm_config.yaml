@@ -1,9 +1,0 @@
-llm:
-  llm_tag: BEDROCK
-  temperature: 0.0
-
-bedrock:
-  region_name: us-east-1
-  model_id: amazon.nova-pro-v1:0
-  model_provider: bedrock
-
